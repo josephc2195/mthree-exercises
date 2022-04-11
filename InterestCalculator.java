@@ -1,16 +1,17 @@
+import java.math.*;
 import java.util.Scanner;
 
 public class InterestCalculator {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        double rate, compRate, initial, years, total;
-        int userPeriod, period = 0;
+        BigDecimal compRate, total, period=new BigDecimal("0");
+        int years, userPeriod;
         System.out.print("How much money do you want to invest? ");
-        initial = sc.nextDouble();
+        BigDecimal initial = new BigDecimal(sc.next());
         System.out.print("How many years are you investing? ");
-        years = sc.nextDouble();
+        years = sc.nextInt();
         System.out.print("What is the annual interest rate growth? ");
-        rate = sc.nextDouble();
+        BigDecimal rate = new BigDecimal(sc.nextDouble());
 
         System.out.println("Choose your compound periods: ");
         System.out.println("1. Quarterly ");
@@ -19,39 +20,44 @@ public class InterestCalculator {
         userPeriod = sc.nextInt();
         switch(userPeriod) {
             case 1:
-                period = 4;                
+                period = new BigDecimal("4"); 
+                userPeriod = 4;               
                 break;
             case 2:
-                period = 12;
+                period = new BigDecimal("12");
+                userPeriod = 12;
                 break;
             case 3:
-                period = 365;
+                period = new BigDecimal("365");
+                userPeriod = 365;
         }
-        compRate = rate / period;
-        
-
+        compRate = rate.divide(period, 2, RoundingMode.HALF_UP);
+        MathContext rounder = new MathContext(2);
         for(int i = 1; i <= years; i++) {
             System.out.println("Year " + i + ": ");
-            System.out.println("Began with: $" + (Math.round(initial * 100.0) / 100.0));
-            total = profit(compRate, initial, period);
+            System.out.println("Began with: $" + initial.round(rounder));
+            total = profit(compRate, initial, userPeriod);
             initial = total;
             System.out.println("***************************************");
         }
         sc.close();
     }
 
-    public static double profit(double cr, double bal, int period ) {
-        double initialBalance = bal;
-        double total=0;
+    public static BigDecimal profit(BigDecimal cr, BigDecimal bal, int period ) {
+        BigDecimal initialBalance = bal;
+        BigDecimal total= new BigDecimal("0");
+        BigDecimal hundred = new BigDecimal("100");
+        BigDecimal one = new BigDecimal("1");
+        MathContext rounder = new MathContext(2);
         for(int i = 0; i < period; i++) {
-            total = bal * (1 + (cr / 100));
+            total = cr.divide(hundred);
+            total = total.add(one);
+            total = total.multiply(bal);
             bal = total;
         }
-        total = (Math.round(total * 100.0) / 100.0);
-        initialBalance = (Math.round(initialBalance * 100.0) / 100.0);
-        double earned = total - initialBalance;
-        System.out.println("Earned $" + (Math.round(earned * 100.0) / 100.0));
-        System.out.println("Ended with $" + total);
+        BigDecimal earned = total.subtract(initialBalance);
+        System.out.println("Earned $" + earned.round(rounder));
+        System.out.println("Ended with $" + total.round(rounder));
         return total;
     }
 }
